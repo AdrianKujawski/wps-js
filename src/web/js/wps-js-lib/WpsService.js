@@ -9,11 +9,13 @@ var WpsService = Class.extend({
 	/**
 	 * 
 	 */
-	init : function(settings) {
+	init: function (settings) {
 		this.settings = settings;
 
 		if (!this.settings.version || (this.settings.version != '1.0.0' && this.settings.version != '2.0.0'))
 			this.settings.version = defaultWpsVersion;
+
+
 	},
 
 	/**
@@ -21,7 +23,7 @@ var WpsService = Class.extend({
 	 * 
 	 * requires Constant.js
 	 */
-	setVersion : function(version) {
+	setVersion: function (version) {
 		if (version == WPS_VERSION_1_0_0 || version == WPS_VERSION_2_0_0)
 			this.settings.version = version;
 	},
@@ -29,7 +31,7 @@ var WpsService = Class.extend({
 	/**
 	 * set base URL of target WPS
 	 */
-	setUrl : function(url) {
+	setUrl: function (url) {
 		this.settings.url = url;
 	},
 
@@ -38,7 +40,7 @@ var WpsService = Class.extend({
 	 * 
 	 * @callbackFunction is triggered on success-event of JQuery.ajax method
 	 */
-	getCapabilities_GET : function(callbackFunction) {
+	getCapabilities_GET: function (callbackFunction) {
 		var capabilitiesRequest;
 
 		/**
@@ -48,8 +50,8 @@ var WpsService = Class.extend({
 		 *                   method. Takes the response object as argument
 		 */
 		capabilitiesRequest = new GetCapabilitiesGetRequest({
-			url : this.settings.url,
-			version : this.settings.version
+			url: this.settings.url,
+			version: this.settings.version
 		});
 
 		capabilitiesRequest.execute(callbackFunction);
@@ -61,15 +63,15 @@ var WpsService = Class.extend({
 	 * @callbackFunction is triggered on success-event of JQuery.ajax method.
 	 *                   Takes the response object as argument
 	 */
-	getCapabilities_POST : function(callbackFunction) {
+	getCapabilities_POST: function (callbackFunction) {
 		var capabilitiesRequest;
 
 		/*
 		 * TODO has to be instantiated depending on the version
 		 */
 		capabilitiesRequest = new GetCapabilitiesPostRequest({
-			url : this.settings.url,
-			version : this.settings.version
+			url: this.settings.url,
+			version: this.settings.version
 		});
 
 		capabilitiesRequest.execute(callbackFunction);
@@ -82,13 +84,13 @@ var WpsService = Class.extend({
 	 *                   Takes the response object as argument
 	 * @processIdentifier the identifier of the process
 	 */
-	describeProcess_GET : function(callbackFunction, processIdentifier) {
+	describeProcess_GET: function (callbackFunction, processIdentifier) {
 		var processDescriptionRequest;
 
 		processDescriptionRequest = new DescribeProcessGetRequest({
-			url : this.settings.url,
-			version : this.settings.version,
-			processIdentifier : processIdentifier
+			url: this.settings.url,
+			version: this.settings.version,
+			processIdentifier: processIdentifier
 		});
 
 		processDescriptionRequest.execute(callbackFunction);
@@ -101,13 +103,13 @@ var WpsService = Class.extend({
 	 *                   Takes the response object as argument
 	 * @processIdentifier the identifier of the process
 	 */
-	describeProcess_POST : function(callbackFunction, processIdentifier) {
+	describeProcess_POST: function (callbackFunction, processIdentifier) {
 		var processDescriptionRequest;
 
 		processDescriptionRequest = new DescribeProcessPostRequest({
-			url : this.settings.url,
-			version : this.settings.version,
-			processIdentifier : processIdentifier
+			url: this.settings.url,
+			version: this.settings.version,
+			processIdentifier: processIdentifier
 		});
 
 		processDescriptionRequest.execute(callbackFunction);
@@ -128,36 +130,52 @@ var WpsService = Class.extend({
 	 * @outputs an array of requested Output objects, use JS-object
 	 *          OutputGenerator to create inputs
 	 */
-	execute : function(callbackFunction, processIdentifier, responseFormat,
-			executionMode, lineage, inputs, outputs) {
+	execute: function (callbackFunction, processIdentifier, responseFormat,
+		executionMode, lineage, inputs, outputs) {
+		var executeRequest = this.createExecuteRequestfunction(processIdentifier, responseFormat,
+			executionMode, lineage, inputs, outputs)
+
+		executeRequest.execute(callbackFunction);
+	},
+
+	getRequestPayLoad: function (processIdentifier, responseFormat,
+		executionMode, lineage, inputs, outputs) {
+		var executeRequest = this.createExecuteRequestfunction(processIdentifier, responseFormat,
+			executionMode, lineage, inputs, outputs)
+
+		return executeRequest.createPostPayload();
+	},
+
+	createExecuteRequestfunction: function (processIdentifier, responseFormat,
+		executionMode, lineage, inputs, outputs) {
 		var executeRequest;
 
 		if (this.settings.version == WPS_VERSION_1_0_0) {
 			executeRequest = new ExecuteRequest_v1({
-				url : this.settings.url,
-				version : this.settings.version,
-				processIdentifier : processIdentifier,
-				responseFormat : responseFormat,
-				executionMode : executionMode,
-				lineage : lineage,
-				inputs : inputs,
-				outputs : outputs
+				url: this.settings.url,
+				version: this.settings.version,
+				processIdentifier: processIdentifier,
+				responseFormat: responseFormat,
+				executionMode: executionMode,
+				lineage: lineage,
+				inputs: inputs,
+				outputs: outputs
 			});
 		}
 
 		else {
 			executeRequest = new ExecuteRequest_v2({
-				url : this.settings.url,
-				version : this.settings.version,
-				processIdentifier : processIdentifier,
-				responseFormat : responseFormat,
-				executionMode : executionMode,
-				inputs : inputs,
-				outputs : outputs
+				url: this.settings.url,
+				version: this.settings.version,
+				processIdentifier: processIdentifier,
+				responseFormat: responseFormat,
+				executionMode: executionMode,
+				inputs: inputs,
+				outputs: outputs
 			});
 		}
 
-		executeRequest.execute(callbackFunction);
+		return executeRequest;
 	},
 
 	/**
@@ -169,8 +187,8 @@ var WpsService = Class.extend({
 	 *                                document is located / can be retrieved
 	 *                                from
 	 */
-	parseStoredExecuteResponse_WPS_1_0 : function(callbackFunction,
-			storedExecuteResponseLocation) {
+	parseStoredExecuteResponse_WPS_1_0: function (callbackFunction,
+		storedExecuteResponseLocation) {
 		/*
 		 * TODO the url stores a ready-to-be-parsed executeResponse. This should
 		 * be parsed as ExecuteResponse_v1_xml object
@@ -178,13 +196,13 @@ var WpsService = Class.extend({
 		 * GET request against that URL
 		 */
 		$.ajax({
-			url : storedExecuteResponseLocation,
-			success : function(executeResponseXML) {
+			url: storedExecuteResponseLocation,
+			success: function (executeResponseXML) {
 				/*
 				 * create the executeResponse as JavaScript object
 				 */
 				var executeResponse = new ExecuteResponse_v1_xml(
-						executeResponseXML);
+					executeResponseXML);
 
 				/*
 				 * call callback function and pass executeResponse-object as
@@ -204,26 +222,26 @@ var WpsService = Class.extend({
 	 *                   parsed StatusInfo document as argument
 	 * @jobId the ID of the asynchronously executed job                  
 	 */
-	getStatus_WPS_2_0 : function(callbackFunction, jobId) {
+	getStatus_WPS_2_0: function (callbackFunction, jobId) {
 		if (this.settings.version == WPS_VERSION_2_0_0) {
 			var getStatusRequest;
 
 			getStatusRequest = new GetStatusGetRequest({
-				url : this.settings.url,
-				version : this.settings.version,
-				jobId : jobId
+				url: this.settings.url,
+				version: this.settings.version,
+				jobId: jobId
 			});
 
 			getStatusRequest.execute(callbackFunction);
 		}
-		else{
+		else {
 			/*
 			 * not supported for WPS 1.0
 			 */
 			throw "Get Status operation is only supported for WPS 2.0!";
 		}
 	},
-	
+
 	/**
 	 * WPS 2.0 getStatus operation to retrieve the status of an executed job
 	 * 
@@ -233,19 +251,19 @@ var WpsService = Class.extend({
 	 *                   parsed StatusInfo document as argument
 	 * @jobId the ID of the asynchronously executed job
 	 */
-	getResult_WPS_2_0 : function(callbackFunction, jobId) {
+	getResult_WPS_2_0: function (callbackFunction, jobId) {
 		if (this.settings.version == WPS_VERSION_2_0_0) {
 			var getResultRequest;
 
 			getResultRequest = new GetResultGetRequest({
-				url : this.settings.url,
-				version : this.settings.version,
-				jobId : jobId
+				url: this.settings.url,
+				version: this.settings.version,
+				jobId: jobId
 			});
 
 			getResultRequest.execute(callbackFunction);
 		}
-		else{
+		else {
 			/*
 			 * not supported for WPS 1.0
 			 */
