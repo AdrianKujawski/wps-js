@@ -15,7 +15,7 @@ var WpsService = Class.extend({
 		if (!this.settings.version || (this.settings.version != '1.0.0' && this.settings.version != '2.0.0'))
 			this.settings.version = defaultWpsVersion;
 
-
+		if (this.settings.parseResponse === undefined) this.settings.parseResponse = true;
 	},
 
 	/**
@@ -154,6 +154,7 @@ var WpsService = Class.extend({
 			executeRequest = new ExecuteRequest_v1({
 				url: this.settings.url,
 				version: this.settings.version,
+				parseResponse: this.settings.parseResponse,
 				processIdentifier: processIdentifier,
 				responseFormat: responseFormat,
 				executionMode: executionMode,
@@ -167,6 +168,7 @@ var WpsService = Class.extend({
 			executeRequest = new ExecuteRequest_v2({
 				url: this.settings.url,
 				version: this.settings.version,
+				parseResponse: this.settings.parseResponse,
 				processIdentifier: processIdentifier,
 				responseFormat: responseFormat,
 				executionMode: executionMode,

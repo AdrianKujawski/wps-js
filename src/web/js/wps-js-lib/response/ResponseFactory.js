@@ -1,6 +1,6 @@
 var ResponseFactory = Class.extend({
 
-	init : function(settings) {
+	init: function (settings) {
 		this.settings = settings;
 	},
 
@@ -11,13 +11,14 @@ var ResponseFactory = Class.extend({
 	 * @requestObject the request object that created the responseFactory. It is
 	 *                used to resolve the response type
 	 */
-	resolveResponseHandler : function(wpsResponse, requestObject) {
+	resolveResponseHandler: function (wpsResponse, requestObject) {
 
 		/*
 		 * version and requestType will be compared to constant values from Constants.js
 		 */
 		var version = requestObject.settings.version;
 		var requestType = requestObject.settings.requestType;
+		var parseResponse = requestObject.settings.parseResponse;
 
 		if (requestType == GET_CAPABILITIES_TYPE) {
 			if (version == WPS_VERSION_1_0_0)
@@ -38,20 +39,22 @@ var ResponseFactory = Class.extend({
 			}
 		} else if (requestType == EXECUTE_TYPE) {
 
-			if (version == WPS_VERSION_1_0_0)
+			if (!parseResponse)
+				return wpsResponse;
+			else if (version == WPS_VERSION_1_0_0)
 				return new ExecuteResponse_v1_xml(wpsResponse);
 			else if (version == WPS_VERSION_2_0_0)
 				return new ExecuteResponse_v2_xml(wpsResponse);
 			else {
-				return null;
+				return wpsResponse;
 			}
 		} else if (requestType == GET_STATUS_TYPE) {
-				return new ExecuteResponse_v2_xml(wpsResponse);
+			return new ExecuteResponse_v2_xml(wpsResponse);
 
 		} else if (requestType == GET_RESULT_TYPE) {
-				return new ExecuteResponse_v2_xml(wpsResponse);
+			return new ExecuteResponse_v2_xml(wpsResponse);
 
-		}else {
+		} else {
 			// TODO
 			return new ExceptionReportResponse(wpsResponse);
 		}
