@@ -50,7 +50,7 @@ var InputGenerator = Class
 		 *              to an external body or the actual POST body
 		 */
 		createComplexDataInput_wps_1_0_and_2_0: function (identifier,
-			mimeType, schema, encoding, asReference, complexPayload, href) {
+			mimeType, schema, encoding, asReference, complexPayload, href, jsessionid) {
 			var input = new Object({
 				type: "complex",
 				identifier: identifier,
@@ -59,7 +59,8 @@ var InputGenerator = Class
 				encoding: encoding || undefined,
 				asReference: asReference || false,
 				complexPayload: complexPayload,
-				href: href || undefined
+				href: href || undefined,
+				jsessionid: jsessionid
 			});
 
 			return input;

@@ -70,8 +70,12 @@ var ExecuteRequest_v1 = ExecuteRequest
 			EXECUTE_REQUEST_XML_COMPLEX_DATA_BY_REFERENCE_COMPLEXPAYLOAD_HREF = '<wps:Input>\
 		  <ows:Identifier>${identifier}</ows:Identifier>\
 		  <wps:Reference mimeType="${mimeType}" xlink:href="${href}" method="POST">\
+			<wps:Header>\
+				<wps:key>Cookie</wps:key>\
+				<wps:value>JSESSIONID=${jsessionid}</wps:value>\
+			</wps:Header>\
 			  <wps:Body>\
-			  ${complexPayload}\
+			  <![CDATA[${complexPayload}]]>\
 			  </wps:Body>\
 		  </wps:Reference>\
 		</wps:Input>';
